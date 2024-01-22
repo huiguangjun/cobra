@@ -79,6 +79,9 @@ type Command struct {
 	// Example is examples of how to use the command.
 	Example string
 
+	// InitFlagsE: adds flags before this command execute.
+	InitFlagsE func(cmd *Command) error
+
 	// ValidArgs is list of all valid non-flag arguments that are accepted in shell completions
 	ValidArgs []string
 	// ValidArgsFunction is an optional function that provides valid non-flag arguments for shell completion.
@@ -884,6 +887,11 @@ func (c *Command) execute(a []string) (err error) {
 
 	// initialize help and version flag at the last point possible to allow for user
 	// overriding
+	if c.InitFlagsE != nil {
+		if err := c.InitFlagsE(c); err != nil {
+			return err
+		}
+	}
 	c.InitDefaultHelpFlag()
 	c.InitDefaultVersionFlag()
 
